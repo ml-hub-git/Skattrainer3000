@@ -1,254 +1,37 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#ffffff">
-<title>April 2026 Kalender – Zähler</title>
-
-<style>
-:root {
-    color-scheme: light;
-}
-
-/* Grundlayout – helles Design erzwingen */
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #ffffff;
-    color: #111111;
-    padding: 12px;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-
-h1 {
-    text-align: center;
-    margin: 10px 0 15px 0;
-    font-size: 22px;
-}
-
-.container {
-    max-width: 700px;
-    margin: auto;
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 12px;
-}
-
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-}
-
-.weekday {
-    text-align: center;
-    font-weight: bold;
-    font-size: 13px;
-    padding: 6px 0;
-    background: #e9edf1;
-    border-radius: 6px;
-}
-
-.day {
-    min-height: 85px;
-    background: #f7f7f7;
-    border-radius: 10px;
-    border: 1px solid #e1e5ea;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    touch-action: manipulation;
-}
-
-.date-number {
-    font-size: 11px;
-    color: #666;
-    text-align: right;
-}
-
-.counter {
-    font-size: 30px;
-    font-weight: bold;
-    text-align: center;
-    color: #111111;
-}
-
-.level-1 { background: #ef4444; color: white; }
-.level-2 { background: #f97316; color: white; }
-.level-3 { background: #facc15; color: #111111; }
-.level-4 { background: #22c55e; color: white; }
-
-.empty {
-    background: transparent;
-    border: none;
-}
-
-.actions {
-    margin-top: 15px;
-    text-align: center;
-}
-
-button {
-    width: 100%;
-    padding: 16px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 10px;
-    border: none;
-    background: #2563eb;
-    color: white;
-}
-
-button:active {
-    transform: scale(0.98);
-}
-
-.info {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #666;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Skat Training</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-<h1>April 2026</h1>
-<div class="calendar" id="calendar">
-    <div class="weekday">Mo</div>
-    <div class="weekday">Di</div>
-    <div class="weekday">Mi</div>
-    <div class="weekday">Do</div>
-    <div class="weekday">Fr</div>
-    <div class="weekday">Sa</div>
-    <div class="weekday">So</div>
+<div class="app">
+
+  <div class="inputs">
+    <input id="inputA" placeholder="Partei A">
+    <input id="inputB" placeholder="Partei B">
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="skat" id="skat"></div>
+
+  <div class="status">
+    <div id="round"></div>
+    <div id="result"></div>
+  </div>
+
+  <div class="buttons">
+    <button id="start">Start</button>
+    <button id="next">Weiter</button>
+    <button id="solve">Lösen</button>
+  </div>
+
 </div>
-<div class="actions">
-    <button onclick="copyLink()">Link mit meinem aktuellen Stand kopieren</button>
-    <div class="info">Der Link enthält alle Werte und funktioniert auch über WhatsApp.</div>
-</div>
-</div>
 
-<script>
-const DAYS = 30;
-const START_DAY = 2;
-let counters = {};
-
-function loadFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    for (let i = 1; i <= DAYS; i++) {
-        const v = params.get("d" + i);
-        counters[i] = v !== null && !isNaN(v) ? Math.max(0, parseInt(v)) : 0;
-    }
-}
-
-function createCalendar() {
-    const calendar = document.getElementById("calendar");
-    for (let i = 0; i < START_DAY; i++) {
-        const empty = document.createElement("div");
-        empty.className = "day empty";
-        calendar.appendChild(empty);
-    }
-
-    for (let d = 1; d <= DAYS; d++) {
-        const day = document.createElement("div");
-        day.className = "day";
-        day.dataset.day = d;
-
-        let longPressFired = false;
-        let timer = null;
-
-        day.addEventListener("pointerdown", (e) => {
-            longPressFired = false;
-            timer = setTimeout(() => {
-                decrement(d);
-                longPressFired = true;
-            }, 500);
-        }, {passive: false});
-
-        day.addEventListener("pointerup", (e) => {
-            clearTimeout(timer);
-            if (!longPressFired && e.pointerType !== 'mouse') increment(d);
-        });
-
-        day.addEventListener("pointercancel", () => clearTimeout(timer));
-        day.addEventListener("contextmenu", e => e.preventDefault());
-
-        if ('ontouchstart' in window === false) {
-            day.addEventListener("click", () => increment(d));
-        }
-
-        const date = document.createElement("div");
-        date.className = "date-number";
-        date.textContent = d + ".";
-
-        const counter = document.createElement("div");
-        counter.className = "counter";
-        counter.id = "c" + d;
-        counter.textContent = counters[d];
-
-        day.appendChild(date);
-        day.appendChild(counter);
-        calendar.appendChild(day);
-
-        applyLevelClass(d, counters[d]);
-    }
-}
-
-function increment(day) {
-    counters[day]++;
-    update(day);
-}
-
-function decrement(day) {
-    counters[day] = Math.max(0, counters[day] - 1);
-    update(day);
-}
-
-function update(day) {
-    document.getElementById("c" + day).textContent = counters[day];
-    applyLevelClass(day, counters[day]);
-}
-
-function applyLevelClass(day, value) {
-    const el = document.querySelector(`[data-day='${day}']`);
-    el.classList.remove("level-1","level-2","level-3","level-4");
-    if (value === 1) el.classList.add("level-1");
-    else if (value === 2) el.classList.add("level-2");
-    else if (value === 3) el.classList.add("level-3");
-    else if (value >= 4) el.classList.add("level-4");
-}
-
-function buildShareUrl() {
-    const base = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams();
-    for (let i = 1; i <= DAYS; i++) params.set("d" + i, counters[i]);
-    return base + "?" + params.toString();
-}
-
-function copyLink() {
-    const url = buildShareUrl();
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(() => alert("Link kopiert"));
-    } else {
-        const input = document.createElement("input");
-        input.value = url;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand("copy");
-        document.body.removeChild(input);
-        alert("Link kopiert");
-    }
-}
-
-loadFromUrl();
-createCalendar();
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>

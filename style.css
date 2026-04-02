@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #0b3d2e;
+  color: white;
+  text-align: center;
+}
+
+.app {
+  padding: 16px;
+}
+
+.inputs input {
+  width: 40%;
+  padding: 12px;
+  margin: 8px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.cards, .skat {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.card {
+  width: 60px;
+  height: 90px;
+  background: white;
+  color: black;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px;
+  font-weight: bold;
+}
+
+.red {
+  color: red;
+}
+
+.active {
+  outline: 4px solid yellow;
+}
+
+button {
+  width: 30%;
+  padding: 14px;
+  margin: 6px;
+  font-size: 18px;
+}
