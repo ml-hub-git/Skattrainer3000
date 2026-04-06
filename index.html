@@ -2,36 +2,121 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Skat Training</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Skat Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="app">
+  <div class="container">
 
-  <div class="inputs">
-    <input id="inputA" placeholder="Partei A">
-    <input id="inputB" placeholder="Partei B">
+    <!-- Header & Stats -->
+    <header class="header">
+      <h1 class="title">♠ SKAT TRAINER ♠</h1>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-label">Rang</div>
+          <div class="stat-value" id="statRang">Anfänger</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Siegesserie</div>
+          <div class="stat-value" id="statSiege">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Spiele</div>
+          <div class="stat-value" id="statSpiele">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Rekord</div>
+          <div class="stat-value" id="statRekord">0</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Score Section: Meine Partei | Skat | Gegenpartei -->
+    <section class="score-panel">
+
+      <div class="party-score" id="partyAPanel">
+        <div class="party-name">Meine Partei</div>
+        <div class="score-row">
+          <span class="score-label">Geschätzt</span>
+          <input type="number" id="inputA" class="score-input"
+                 placeholder="?" min="0" max="120" inputmode="numeric">
+        </div>
+        <div class="score-row">
+          <span class="score-label">Ist</span>
+          <span id="actualA" class="actual-value">—</span>
+        </div>
+      </div>
+
+      <div class="skat-divider">
+        <div class="skat-title">SKAT</div>
+        <div class="skat-cards" id="skatCards">
+          <div class="card-back"></div>
+          <div class="card-back"></div>
+        </div>
+        <div id="skatPunkte" class="skat-punkte">? Pkt.</div>
+      </div>
+
+      <div class="party-score right" id="partyBPanel">
+        <div class="party-name">Gegenpartei</div>
+        <div class="score-row">
+          <span class="score-label">Geschätzt</span>
+          <input type="number" id="inputB" class="score-input"
+                 placeholder="?" min="0" max="120" inputmode="numeric">
+        </div>
+        <div class="score-row">
+          <span class="score-label">Ist</span>
+          <span id="actualB" class="actual-value">—</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Game Table / Tischmitte -->
+    <section class="game-table">
+      <div class="side-indicator" id="indicatorA">
+        <div class="side-label">A</div>
+        <div class="side-arrow">◀</div>
+      </div>
+
+      <div class="tischmitte-wrap">
+        <div class="tischmitte" id="tischmitte">
+          <p class="tisch-hint">Klicke <strong>Start</strong> um zu beginnen</p>
+        </div>
+        <div id="roundDisplay" class="round-display"></div>
+      </div>
+
+      <div class="side-indicator right" id="indicatorB">
+        <div class="side-arrow">▶</div>
+        <div class="side-label">B</div>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <div id="result" class="result-display"></div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button id="btnStart" class="btn btn-start">Start</button>
+      <button id="btnWeiter" class="btn btn-weiter hidden">Weiter</button>
+      <button id="btnLoesen" class="btn btn-loesen hidden">Lösen</button>
+    </div>
+
   </div>
 
-  <div class="cards" id="cards"></div>
-
-  <div class="skat" id="skat"></div>
-
-  <div class="status">
-    <div id="round"></div>
-    <div id="result"></div>
+  <!-- Rank-Up Modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-icon">🎉</div>
+      <div class="modal-title" id="modalTitle">Aufgestiegen!</div>
+      <div class="modal-msg" id="modalMsg"></div>
+      <button id="modalClose" class="btn btn-start">Weiter geht's!</button>
+    </div>
   </div>
 
-  <div class="buttons">
-    <button id="start">Start</button>
-    <button id="next">Weiter</button>
-    <button id="solve">Lösen</button>
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
