@@ -277,22 +277,63 @@ body {
 .legend-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-  margin-top: 6px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .legend-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
   background: rgba(255,255,255,.04);
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: .78rem;
+  border-radius: 8px;
+  padding: 8px 6px 7px;
 }
 
-.l-card { font-weight: 700; color: var(--gold); }
-.l-pts  { color: var(--muted); }
+/* Mini legend card – inherits .card but with fixed tiny size */
+.card-legend {
+  background: linear-gradient(145deg, #fffdf7 0%, #f5f0e2 100%);
+  color: #1a1a2e;
+  border: 1px solid #c8bfa0;
+  border-radius: 6px;
+  width: 38px;
+  height: 54px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3px 4px 3px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,.4),
+              0 1px 0 rgba(255,255,255,.7) inset;
+  font-weight: 800;
+  user-select: none;
+}
+.card-legend::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,.05);
+  pointer-events: none;
+}
+.card-legend.red { color: #c0392b; }
+.card-legend .cl-corner {
+  display: flex; flex-direction: column;
+  align-items: flex-start; line-height: 1; gap: 0;
+}
+.card-legend .cl-corner.bot { transform: rotate(180deg); align-self: flex-end; }
+.card-legend .cl-label { font-size: .58rem; font-weight: 900; line-height: 1; }
+.card-legend .cl-suit  { font-size: .44rem; line-height: 1; }
+.card-legend .cl-center {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; line-height: 1; opacity: .9;
+  pointer-events: none;
+}
+
+.l-pts { color: var(--muted); font-size: .7rem; }
 .legend-total {
   margin-top: 6px;
   text-align: center;
@@ -686,12 +727,12 @@ body {
     </button>
     <div class="legend-body" id="legendBody">
       <div class="legend-grid">
-        <div class="legend-row"><span class="l-card">A</span><span class="l-pts">11 Pkt.</span></div>
-        <div class="legend-row"><span class="l-card">10</span><span class="l-pts">10 Pkt.</span></div>
-        <div class="legend-row"><span class="l-card">K</span><span class="l-pts">4 Pkt.</span></div>
-        <div class="legend-row"><span class="l-card">D</span><span class="l-pts">3 Pkt.</span></div>
-        <div class="legend-row"><span class="l-card">B</span><span class="l-pts">2 Pkt.</span></div>
-        <div class="legend-row"><span class="l-card">7–9</span><span class="l-pts">0 Pkt.</span></div>
+        <div class="legend-row"><div class="card-legend"><div class="cl-corner"><span class="cl-label" style="color:#1a1a2e">A</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div><div class="cl-center" style="color:#1a1a2e">♠</div><div class="cl-corner bot"><span class="cl-label" style="color:#1a1a2e">A</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div></div><span class="l-pts">11 Pkt.</span></div>
+        <div class="legend-row"><div class="card-legend red"><div class="cl-corner"><span class="cl-label" style="color:#c0392b">10</span><span class="cl-suit"  style="color:#c0392b">♥</span></div><div class="cl-center" style="color:#c0392b">♥</div><div class="cl-corner bot"><span class="cl-label" style="color:#c0392b">10</span><span class="cl-suit"  style="color:#c0392b">♥</span></div></div><span class="l-pts">10 Pkt.</span></div>
+        <div class="legend-row"><div class="card-legend red"><div class="cl-corner"><span class="cl-label" style="color:#c0392b">K</span><span class="cl-suit"  style="color:#c0392b">♦</span></div><div class="cl-center" style="color:#c0392b">♦</div><div class="cl-corner bot"><span class="cl-label" style="color:#c0392b">K</span><span class="cl-suit"  style="color:#c0392b">♦</span></div></div><span class="l-pts">4 Pkt.</span></div>
+        <div class="legend-row"><div class="card-legend"><div class="cl-corner"><span class="cl-label" style="color:#1a1a2e">D</span><span class="cl-suit"  style="color:#1a1a2e">♣</span></div><div class="cl-center" style="color:#1a1a2e">♣</div><div class="cl-corner bot"><span class="cl-label" style="color:#1a1a2e">D</span><span class="cl-suit"  style="color:#1a1a2e">♣</span></div></div><span class="l-pts">3 Pkt.</span></div>
+        <div class="legend-row"><div class="card-legend"><div class="cl-corner"><span class="cl-label" style="color:#1a1a2e">B</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div><div class="cl-center" style="color:#1a1a2e">♠</div><div class="cl-corner bot"><span class="cl-label" style="color:#1a1a2e">B</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div></div><span class="l-pts">2 Pkt.</span></div>
+        <div class="legend-row"><div style="display:flex;gap:3px;align-items:center;"><div class="card-legend"><div class="cl-corner"><span class="cl-label" style="color:#1a1a2e">7</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div><div class="cl-center" style="color:#1a1a2e">♠</div><div class="cl-corner bot"><span class="cl-label" style="color:#1a1a2e">7</span><span class="cl-suit"  style="color:#1a1a2e">♠</span></div></div><div class="card-legend"><div class="cl-corner"><span class="cl-label" style="color:#1a1a2e">8</span><span class="cl-suit"  style="color:#1a1a2e">♣</span></div><div class="cl-center" style="color:#1a1a2e">♣</div><div class="cl-corner bot"><span class="cl-label" style="color:#1a1a2e">8</span><span class="cl-suit"  style="color:#1a1a2e">♣</span></div></div><div class="card-legend red"><div class="cl-corner"><span class="cl-label" style="color:#c0392b">9</span><span class="cl-suit"  style="color:#c0392b">♦</span></div><div class="cl-center" style="color:#c0392b">♦</div><div class="cl-corner bot"><span class="cl-label" style="color:#c0392b">9</span><span class="cl-suit"  style="color:#c0392b">♦</span></div></div></div><span class="l-pts">0 Pkt.</span></div>
       </div>
       <div class="legend-total">∑ 120 Punkte im Deck</div>
     </div>
@@ -726,7 +767,7 @@ body {
     <button id="btnLoesen" class="btn btn-loesen hidden">Lösen</button>
   </div>
 
-  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v1.8</p>
+  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v1.9</p>
 
 </div>
 
