@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <title>Skat Trainer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -831,7 +831,7 @@ body {
 
 <script>
 /* ============================================================
-   SKAT TRAINER v1.6
+   SKAT TRAINER v1.9
    ============================================================ */
 
 /* ── Deck constants ────────────────────────────────────── */
@@ -916,10 +916,19 @@ function drawRandom(deck){
 }
 
 /* ── Accuracy ──────────────────────────────────────────── */
+/* distributed = 120 − skatPts is always ≥ 98 (max skat = 22), so no zero-guard needed. */
 function calcAccuracy(ga, gb, actualA, actualB, skatPts) {
   var distributed = 120 - skatPts;
-  if(distributed <= 0) return 100;
   var delta = Math.abs(ga - actualA) + Math.abs(gb - actualB);
+  var pct   = 100 - (delta / distributed * 100);
+  return Math.max(0, Math.round(pct));
+}
+/* Easy-Mode: nur Partei A zählt. Gleiche Bezugsskala wie calcAccuracy,
+   damit das numerische Ergebnis mit dem bisherigen (state.scoreB-Trick)
+   Verhalten übereinstimmt. */
+function calcAccuracyA(ga, actualA, skatPts) {
+  var distributed = 120 - skatPts;
+  var delta = Math.abs(ga - actualA);
   var pct   = 100 - (delta / distributed * 100);
   return Math.max(0, Math.round(pct));
 }
@@ -940,7 +949,17 @@ function defP() {
           avgMode:10,onboardingSeen:false,difficulty:'normal',box1Mode:'streak',box2Mode:'today'};
 }
 function saveP(p) {
-  try { localStorage.setItem('skat_p',JSON.stringify(p)); } catch(e){}
+  try {
+    localStorage.setItem('skat_p',JSON.stringify(p));
+  } catch(e) {
+    if(typeof console!=='undefined' && console.warn)
+      console.warn('[skat] Fortschritt konnte nicht gespeichert werden:', e);
+    var el=document.getElementById('result');
+    if(el){
+      el.textContent='⚠ Fortschritt konnte nicht gespeichert werden.';
+      el.className='result-display info';
+    }
+  }
 }
 function getRank(s) {
   var r=RANKS[0];
@@ -1231,6 +1250,9 @@ function openSettings() {
 }
 
 function setDiff(d) {
+  /* Laufenden Timer stoppen, damit ein zuvor gestarteter 5/20-Sek-Timer
+     keine Runde mehr triggert, sobald die Schwierigkeit gewechselt wurde. */
+  clearTimer();
   var p=loadP(); p.difficulty=d; saveP(p);
   ['diffEasy','diffNormal','diffHard'].forEach(function(id){ G(id).classList.remove('active'); });
   G(d==='easy'?'diffEasy':d==='hard'?'diffHard':'diffNormal').classList.add('active');
@@ -1306,9 +1328,14 @@ function solve() {
     G('result').textContent='Bitte beide Felder ausfüllen!';
     G('result').className='result-display info'; return;
   }
+  /* Nur nichtnegative Ganzzahlen im Bereich 0–120 akzeptieren. */
+  if(!/^\d+$/.test(ra) || !/^\d+$/.test(rb)){
+    G('result').textContent='Nur ganze Zahlen zwischen 0 und 120!';
+    G('result').className='result-display info'; return;
+  }
   var ga=parseInt(ra,10), gb=parseInt(rb,10);
-  if(isNaN(ga)||isNaN(gb)){
-    G('result').textContent='Nur Zahlen eingeben!';
+  if(ga<0||ga>120||gb<0||gb>120){
+    G('result').textContent='Werte müssen zwischen 0 und 120 liegen!';
     G('result').className='result-display info'; return;
   }
 
@@ -1335,8 +1362,9 @@ function solve() {
   var diff = getDiff();
   var acc, correct;
   if(diff === 'easy') {
-    /* Leicht: only party A must be exact; accuracy reflects A only */
-    acc     = calcAccuracy(ga, state.scoreB, state.scoreA, state.scoreB, state.skatPts);
+    /* Leicht: nur Partei A zählt. Identisches numerisches Verhalten
+       wie zuvor, jedoch ohne den state.scoreB-Trick in calcAccuracy. */
+    acc     = calcAccuracyA(ga, state.scoreA, state.skatPts);
     correct = (ga === state.scoreA);
   } else {
     acc     = calcAccuracy(ga, gb, state.scoreA, state.scoreB, state.skatPts);
@@ -1382,9 +1410,9 @@ function solve() {
     if(newRank.name!==prevRank.name && RANK_MSGS[newRank.name]){
       setTimeout(function(){ showRankModal('🎉 '+newRank.name+'!',RANK_MSGS[newRank.name]); },700);
     } else if(p.streak>oldRec && p.streak>1){
-      var diff=p.streak-oldRec;
-      var msg=diff>1
-        ?p.streak+' hintereinander! '+diff+' mehr als dein letzter Rekord!'
+      var growth=p.streak-oldRec;
+      var msg=growth>1
+        ?p.streak+' hintereinander! '+growth+' mehr als dein letzter Rekord!'
         :'Und nochmal steigt dein Rekord um einen!';
       setTimeout(function(){ showRankModal('⭐ Neuer Rekord!',msg); },700);
     }
