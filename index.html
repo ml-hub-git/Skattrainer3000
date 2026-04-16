@@ -197,7 +197,44 @@ body {
   margin-bottom: 2px;
 }
 
-.score-row { display: flex; align-items: center; gap: 6px; }
+.score-row { display: flex; align-items: center; gap: 6px; position: relative; }
+
+/* ── Truth-Zahl rechts neben der Eingabe (Variante A) ── */
+.truth-arrow, .truth-num {
+  opacity: 0;
+  transform: translateX(-10px) scale(.7);
+  transition: opacity .45s .25s ease,
+              transform .45s .25s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+.truth-arrow {
+  color: var(--muted);
+  font-size: .85rem;
+  margin: 0 1px;
+}
+.truth-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ok);
+  white-space: nowrap;
+}
+.truth-arrow.show, .truth-num.show {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* Skat-Punkte: vorher ausgeblendet, beim Lösen einblenden */
+.skat-punkte.ist-reveal {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: opacity .35s ease-out, max-height .35s ease-out;
+}
+.skat-punkte.ist-reveal.revealed {
+  max-height: 20px;
+  opacity: 1;
+}
 
 .score-label {
   font-size: .6rem;
@@ -219,24 +256,104 @@ body {
   font-weight: 700;
   text-align: center;
   -moz-appearance: textfield;
-  transition: border-color .2s, background .2s;
+  transition: background .55s ease,
+              border-color .55s ease,
+              color .55s ease,
+              font-weight .55s ease,
+              box-shadow .55s ease,
+              transform .35s ease;
 }
 .score-input::-webkit-inner-spin-button,
 .score-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .score-input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,.14); }
-.score-input:disabled { opacity: .5; cursor: not-allowed; }
+.score-input:disabled { opacity: 1; cursor: default; } /* nach dem Lösen: Farben statt Grau-Dim */
 
-.actual-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.05rem;
+/* Reveal-Zustände (Variante A) */
+.score-input.correct {
+  background: rgba(46,204,113,.22);
+  border-color: var(--ok);
+  color: var(--ok);
   font-weight: 700;
-  color: var(--gold);
-  min-width: 26px;
-  text-align: center;
-  transition: color .3s;
 }
-.actual-value.correct { color: var(--ok); }
-.actual-value.wrong   { color: var(--err); }
+.score-input.wrong {
+  background: rgba(231,76,60,.2);
+  border-color: var(--err);
+  color: var(--err);
+  font-weight: 400;   /* rot = normal */
+}
+.score-input.gold-glow {
+  background: rgba(201,162,39,.28);
+  border-color: var(--gold-l);
+  color: var(--gold-l);
+  font-weight: 700;
+  animation: goldPulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 18px rgba(224,186,80,.5);
+  transform: scale(1.04);
+}
+@keyframes goldPulse {
+  0%,100% { box-shadow: 0 0 12px rgba(224,186,80,.4); }
+  50%     { box-shadow: 0 0 24px rgba(224,186,80,.9); }
+}
+
+/* ── Gold-Sieg-Effekte: Ring + Strahlen + Funken ─────── */
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Ring: expandiert aus der Box-Mitte */
+.fx-ring {
+  position: absolute;
+  width: 20px; height: 20px;
+  border: 2px solid rgba(224,186,80,.85);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(.3);
+  opacity: 0;
+  animation: fxRing .8s ease-out forwards;
+}
+@keyframes fxRing {
+  0%   { transform: translate(-50%, -50%) scale(.3); opacity: 1; border-width: 3px; }
+  100% { transform: translate(-50%, -50%) scale(5);  opacity: 0; border-width: 1px; }
+}
+
+/* Strahl: radial aus der Box-Mitte */
+.fx-ray {
+  position: absolute;
+  width: 2px; height: 0;
+  background: linear-gradient(to top,
+              transparent 0%,
+              rgba(224,186,80,.9) 50%,
+              #fff3b0 100%);
+  transform-origin: 50% 0%;
+  border-radius: 2px;
+  opacity: 0;
+  animation: fxRay .75s ease-out forwards;
+}
+@keyframes fxRay {
+  0%   { height: 0;            opacity: 0; }
+  30%  { opacity: 1; }
+  100% { height: var(--len, 72px); opacity: 0; }
+}
+
+/* Funke: radialer Punkt */
+.fx-spark {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: radial-gradient(circle, #fff3b0 0%, #e0ba50 55%, transparent 75%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px 1px rgba(224,186,80,.9);
+  opacity: 0;
+  animation: fxSpark 1s ease-out forwards;
+}
+@keyframes fxSpark {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(.4); }
+  60%  { opacity: 1; }
+  100% { opacity: 0;
+         transform: translate(calc(-50% + var(--dx)),
+                              calc(-50% + var(--dy))) scale(.2); }
+}
 
 /* Skat center column */
 .skat-div {
@@ -347,12 +464,12 @@ body {
 .game-table {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
   background: var(--felt);
   border-radius: 16px;
-  padding: 16px 10px;
-  min-height: 148px;
+  padding: 16px 8px;
+  min-height: 158px;
   box-shadow: inset 0 0 40px rgba(0,0,0,.35), 0 4px 20px rgba(0,0,0,.4);
   transition: box-shadow .35s;
 }
@@ -395,12 +512,40 @@ body {
   100% { opacity: 0; }
 }
 
+/* ── Side indicators (Punkt 1: 90° gedrehte Labels) ─────── */
 .side-indicator {
   display: flex; flex-direction: column; align-items: center;
-  gap: 4px; flex-shrink: 0; transition: filter .3s; width: 26px;
+  justify-content: center;
+  gap: 6px; flex-shrink: 0; transition: filter .3s;
+  width: 30px;
 }
-.side-label { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:rgba(255,255,255,.2); transition:color .3s; }
-.side-arrow { font-size:.6rem; color:rgba(255,255,255,.1); transition:color .3s,transform .3s; }
+.side-arrow {
+  font-size: .75rem;
+  color: rgba(255,255,255,.18);
+  transition: color .3s, transform .3s;
+  flex-shrink: 0;
+}
+.side-label {
+  font-family: 'Playfair Display', serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.22);
+  transition: color .3s;
+  white-space: nowrap;
+  line-height: 1;
+}
+/* Linke Seite: Text von unten nach oben (natürliche Leserichtung bei Kopfneigung nach links) */
+.side-indicator.left .side-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+/* Rechte Seite: Text von oben nach unten */
+.side-indicator.right .side-label {
+  writing-mode: vertical-rl;
+}
+
 .side-indicator.active .side-label { color: #ff7070; }
 .side-indicator.active .side-arrow { color: #ff7070; transform: scale(1.4); }
 .side-indicator.active { filter: drop-shadow(0 0 8px rgba(255,80,80,.6)); }
@@ -640,11 +785,15 @@ body {
   .score-label { width:48px; font-size:.56rem; }
   .card { width:52px; height:78px; }
   .card .card-suit-center { font-size:1.45rem; }
+  .side-indicator { width: 26px; }
+  .side-label { font-size: .66rem; letter-spacing: 1.5px; }
 }
 @media (max-width:360px) {
   .card { width:46px; height:70px; }
   .btn  { min-width:88px; padding:11px 12px; font-size:.82rem; }
   .title { letter-spacing:2px; }
+  .side-indicator { width: 22px; }
+  .side-label { font-size: .6rem; letter-spacing: 1px; }
 }
 
 /* ── Timer (Schwer mode) ───────────────────────────────── */
@@ -852,10 +1001,8 @@ body {
       <div class="score-row">
         <span class="score-label">Geschätzt</span>
         <input type="number" id="inputA" class="score-input" placeholder="?" min="0" max="120" inputmode="numeric">
-      </div>
-      <div class="score-row">
-        <span class="score-label">Ist</span>
-        <span id="actualA" class="actual-value">—</span>
+        <span class="truth-arrow" id="arrowA">→</span>
+        <span id="actualA" class="truth-num"></span>
       </div>
     </div>
 
@@ -864,7 +1011,7 @@ body {
       <div class="skat-cards" id="skatCards">
         <div class="card-back"></div><div class="card-back"></div>
       </div>
-      <div id="skatPunkte" class="skat-punkte">? Pkt.</div>
+      <div id="skatPunkte" class="skat-punkte ist-reveal">? Pkt.</div>
     </div>
 
     <div class="party-score party-b">
@@ -872,10 +1019,8 @@ body {
       <div class="score-row">
         <span class="score-label">Geschätzt</span>
         <input type="number" id="inputB" class="score-input" placeholder="?" min="0" max="120" inputmode="numeric">
-      </div>
-      <div class="score-row">
-        <span class="score-label">Ist</span>
-        <span id="actualB" class="actual-value">—</span>
+        <span class="truth-arrow" id="arrowB">→</span>
+        <span id="actualB" class="truth-num"></span>
       </div>
     </div>
   </section>
@@ -901,15 +1046,15 @@ body {
 
   <!-- ── Spieltisch ─────────────────────────────────── -->
   <section class="game-table" id="gameTable">
-    <div class="side-indicator" id="indicatorA">
-      <div class="side-label">A</div>
+    <div class="side-indicator left" id="indicatorA">
       <div class="side-arrow">◀</div>
+      <div class="side-label">Meine Partei</div>
     </div>
     <div class="tischmitte-wrap">
+      <div id="roundDisplay" class="round-display"></div>
       <div class="tischmitte" id="tischmitte">
         <p class="tisch-hint">Klicke <strong>Start</strong> um zu beginnen</p>
       </div>
-      <div id="roundDisplay" class="round-display"></div>
       <div class="timer-wrap hidden" id="timerWrap">
         <svg class="timer-ring" viewBox="0 0 64 64" aria-hidden="true">
           <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="4"/>
@@ -922,9 +1067,9 @@ body {
         <div id="timerDisplay" class="timer-text"></div>
       </div>
     </div>
-    <div class="side-indicator" id="indicatorB">
+    <div class="side-indicator right" id="indicatorB">
       <div class="side-arrow">▶</div>
-      <div class="side-label">B</div>
+      <div class="side-label">Gegenpartei</div>
     </div>
   </section>
 
@@ -938,7 +1083,7 @@ body {
     <button id="btnLoesen" class="btn btn-loesen hidden">Lösen</button>
   </div>
 
-  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v2.0</p>
+  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v2.2</p>
 
 </div>
 
@@ -1010,7 +1155,7 @@ body {
 
 <script>
 /* ============================================================
-   SKAT TRAINER v2.0
+   SKAT TRAINER v2.2
    ============================================================ */
 
 /* ── Deck constants ────────────────────────────────────── */
@@ -1253,6 +1398,102 @@ function updateChart() {
 function G(id){ return document.getElementById(id); }
 function show(id){ G(id).classList.remove('hidden'); }
 function hide(id){ G(id).classList.add('hidden'); }
+
+/* Reveal-Helpers (Variante A) */
+function resetRevealUI() {
+  ['inputA','inputB'].forEach(function(id){
+    var el = G(id);
+    el.classList.remove('correct','wrong','gold-glow');
+  });
+  ['arrowA','arrowB'].forEach(function(id){
+    G(id).classList.remove('show');
+  });
+  ['actualA','actualB'].forEach(function(id){
+    var el = G(id);
+    el.classList.remove('show');
+    el.textContent = '';
+  });
+  G('skatPunkte').classList.remove('revealed');
+  clearFxLayers();
+}
+
+function revealTruth(side, actualValue) {
+  /* side = 'A' | 'B'. Truth-Zahl + Pfeil einblenden. */
+  var arrow = G('arrowA'); var num = G('actualA');
+  if(side === 'B') { arrow = G('arrowB'); num = G('actualB'); }
+  num.textContent = actualValue;
+  /* rAF damit das leer→befüllt den transition-start sauber triggert */
+  requestAnimationFrame(function(){
+    arrow.classList.add('show');
+    num.classList.add('show');
+  });
+}
+
+function clearFxLayers() {
+  var layers = document.querySelectorAll('.fx-layer');
+  for(var i=0;i<layers.length;i++) layers[i].parentNode.removeChild(layers[i]);
+}
+
+/* Gold-Burst: Ring → Strahlen → Funken, zentriert auf einem Element.
+   Das Element bekommt einen .fx-layer als Geschwister im Eltern-container,
+   der sich exakt über die Box legt. Nach 1.2 s wird der Layer entfernt. */
+function fireGoldBurst(targetEl) {
+  var parent = targetEl.parentNode;   /* .score-row, hat position:relative */
+  var layer = document.createElement('div');
+  layer.className = 'fx-layer';
+  parent.appendChild(layer);
+
+  /* Mittelpunkt der Box relativ zur .score-row */
+  var cx = targetEl.offsetLeft + targetEl.offsetWidth / 2;
+  var cy = targetEl.offsetTop  + targetEl.offsetHeight / 2;
+
+  /* --- Ring (sofort) --- */
+  var ring = document.createElement('div');
+  ring.className = 'fx-ring';
+  ring.style.left = cx + 'px';
+  ring.style.top  = cy + 'px';
+  layer.appendChild(ring);
+
+  /* --- Strahlen (30ms Versatz) --- */
+  setTimeout(function(){
+    var N = 12;
+    for(var i=0;i<N;i++){
+      var ray = document.createElement('div');
+      ray.className = 'fx-ray';
+      var rot = (360/N)*i + (Math.random()*10 - 5);
+      var len = (55 + Math.random()*30) + 'px';
+      ray.style.left = cx + 'px';
+      ray.style.top  = cy + 'px';
+      ray.style.transform = 'rotate('+rot+'deg)';
+      ray.style.setProperty('--len', len);
+      ray.style.animationDelay = (Math.random()*.08) + 's';
+      layer.appendChild(ray);
+    }
+  }, 30);
+
+  /* --- Funken (50ms Versatz) --- */
+  setTimeout(function(){
+    var N = 14;
+    for(var i=0;i<N;i++){
+      var spark = document.createElement('div');
+      spark.className = 'fx-spark';
+      var angle = (Math.PI*2*i)/N + (Math.random()*.4 - .2);
+      var dist  = 42 + Math.random()*38;
+      spark.style.left = cx + 'px';
+      spark.style.top  = cy + 'px';
+      spark.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
+      spark.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
+      spark.style.animationDelay = (Math.random()*.15) + 's';
+      spark.style.animationDuration = (.7 + Math.random()*.4) + 's';
+      layer.appendChild(spark);
+    }
+  }, 50);
+
+  /* Aufräumen nach vollem Ablauf */
+  setTimeout(function(){
+    if(layer.parentNode) layer.parentNode.removeChild(layer);
+  }, 1400);
+}
 
 function mkCardFace(card, color) {
   /* Baut das Front-Face (Corners + Suit-Center). Gibt ein DocumentFragment aus. */
@@ -1566,14 +1807,15 @@ function startGame() {
 
   G('inputA').value=''; G('inputB').value='';
   G('inputA').disabled=false; G('inputB').disabled=false;
-  G('actualA').textContent='—'; G('actualB').textContent='—';
-  G('actualA').className='actual-value'; G('actualB').className='actual-value';
   G('skatPunkte').textContent='? Pkt.';
   G('skatCards').innerHTML='<div class="card-back"></div><div class="card-back"></div>';
   G('result').textContent=''; G('result').className='result-display';
-  G('indicatorA').className='side-indicator'; G('indicatorB').className='side-indicator';
+  G('indicatorA').className='side-indicator left'; G('indicatorB').className='side-indicator right';
   G('gameTable').className='game-table';
   G('btnStart').textContent='Neustart';
+
+  /* Reveal-UI zurücksetzen (Variante A) */
+  resetRevealUI();
 
   show('btnWeiter'); hide('btnLoesen');
   updateStats();
@@ -1586,11 +1828,11 @@ function nextRound() {
   var party=Math.random()<0.5?'A':'B';
   if(party==='A') state.scoreA+=pts; else state.scoreB+=pts;
   state.currentCards=drawn; state.currentParty=party;
-  renderTable();
   G('roundDisplay').textContent='Runde '+state.round+' / 10';
+  renderTable();
   state.round++;
-  G('indicatorA').className='side-indicator'+(party==='A'?' active':'');
-  G('indicatorB').className='side-indicator'+(party==='B'?' active':'');
+  G('indicatorA').className='side-indicator left'+(party==='A'?' active':'');
+  G('indicatorB').className='side-indicator right'+(party==='B'?' active':'');
   var tbl=G('gameTable');
   tbl.classList.remove('active-a','active-b','glow-correct','glow-near','glow-wrong');
   tbl.classList.add(party==='A' ? 'active-a' : 'active-b');
@@ -1627,25 +1869,46 @@ function solve() {
   G('skatCards').appendChild(mkCard(s1,true));
   G('skatCards').appendChild(mkCard(s2,true));
 
-  /* Reveal */
-  G('actualA').textContent=state.scoreA;
-  G('actualB').textContent=state.scoreB;
+  /* Reveal: Inputs deaktivieren, Truth-Zahlen vorbereiten */
   G('inputA').disabled=true; G('inputB').disabled=true;
   hide('btnLoesen');
   G('btnStart').textContent='Nächste Runde';
 
-  /* Mark each guess */
-  G('actualA').classList.add(ga===state.scoreA?'correct':'wrong');
-  G('actualB').classList.add(gb===state.scoreB?'correct':'wrong');
+  /* Skat-Punkte einblenden */
+  G('skatPunkte').classList.add('revealed');
+
+  /* Einzelne Treffer prüfen (unabhängig vom Schwierigkeitsgrad) */
+  var aOk = (ga === state.scoreA);
+  var bOk = (gb === state.scoreB);
+  var bothExact = aOk && bOk;
+
+  /* Variante A: Eingabebox einfärben, bei Fehler die Wahrheit daneben */
+  var inA = G('inputA'), inB = G('inputB');
+  if(bothExact){
+    inA.classList.add('gold-glow');
+    inB.classList.add('gold-glow');
+  } else {
+    inA.classList.add(aOk ? 'correct' : 'wrong');
+    inB.classList.add(bOk ? 'correct' : 'wrong');
+    if(!aOk) revealTruth('A', state.scoreA);
+    if(!bOk) revealTruth('B', state.scoreB);
+  }
+
+  /* Gold-Burst bei beiden richtig — Ring + Strahlen + Funken */
+  if(bothExact){
+    setTimeout(function(){
+      fireGoldBurst(inA);
+      fireGoldBurst(inB);
+    }, 250);
+  }
 
   /* Accuracy – adjusted for difficulty */
   var diff = getDiff();
   var acc, correct;
   if(diff === 'easy') {
-    /* Leicht: nur Partei A zählt. Identisches numerisches Verhalten
-       wie zuvor, jedoch ohne den state.scoreB-Trick in calcAccuracy. */
+    /* Leicht: nur Partei A zählt. */
     acc     = calcAccuracyA(ga, state.scoreA, state.skatPts);
-    correct = (ga === state.scoreA);
+    correct = aOk;
   } else {
     acc     = calcAccuracy(ga, gb, state.scoreA, state.scoreB, state.skatPts);
     correct = (acc === 100);
@@ -1663,14 +1926,13 @@ function solve() {
     G('result').className='result-display wrong';
   }
 
-  /* Tabletop-Glow (Effekt 4) */
-  var glowCls = correct ? 'glow-correct' : (acc >= 80 ? 'glow-near' : 'glow-wrong');
+  /* Active-Side-Highlight entfernen (der Tabletop-Glow entfällt in v2.2 —
+     Funken + Strahlen + Ring übernehmen die visuelle Rückmeldung bei Gold,
+     Einfärbung der Box reicht bei Teiltreffern/Fehlern). */
   var tbl = G('gameTable');
   tbl.classList.remove('active-a','active-b','glow-correct','glow-near','glow-wrong');
-  void tbl.offsetWidth;  /* Reflow erzwingen, damit die Animation sauber neu startet */
-  tbl.classList.add(glowCls);
 
-  /* Haptic (Effekt 5) */
+  /* Haptic */
   if(correct)       haptic([50,30,50]);
   else if(acc >= 80) haptic([80]);
   else               haptic([200]);
