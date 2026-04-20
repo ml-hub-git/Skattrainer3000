@@ -1044,7 +1044,7 @@ body {
     <button id="btnLoesen" class="btn btn-loesen hidden">Lösen</button>
   </div>
 
-  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v2.3</p>
+  <p style="text-align:center;font-size:.52rem;letter-spacing:2px;color:#2d7a4a;opacity:.65;margin-top:2px;user-select:none;">v2.4</p>
 
 </div>
 
@@ -1116,11 +1116,11 @@ body {
 
 <script>
 /* ============================================================
-   SKAT TRAINER v2.3
-   Änderungen ggü. v2.2:
-   - Punkt 1: #result sitzt jetzt in .tischmitte-wrap (im Tisch)
-   - Punkt 2: Geschätzt-Labels entfernt, Inputs zentriert
-   - Tech-Debt: ungenutzte Tabletop-Glow-CSS + JS-References entfernt
+   SKAT TRAINER v2.4
+   Änderungen ggü. v2.3:
+   - Persistenter Rang: einmal erreichte Ränge bleiben erhalten,
+     auch wenn der Streak bricht. Nur Difficulty-Wechsel setzt zurück.
+   - Neues Feld highestRankIdx in skat_p (+ Backfill aus record).
    ============================================================ */
 
 var SUITS = ['♦','♥','♠','♣'];
@@ -1212,13 +1212,19 @@ function loadP() {
     if (!saved) return defP();
     var defs = defP();
     for (var k in defs) { if (saved[k] === undefined) saved[k] = defs[k]; }
+    // Backfill: Bestands-Saves (vor v2.4) hatten kein highestRankIdx.
+    // Leite den historisch erreichten Höchstrang aus dem besten Streak (record) ab.
+    if (!saved.highestRankIdx && saved.record > 0) {
+      saved.highestRankIdx = RANKS.indexOf(getRank(saved.record));
+    }
     return saved;
   } catch(e) { return defP(); }
 }
 function defP() {
   return {streak:0,record:0,games:0,wins:0,
           history:[],lastWinDate:'',dayStreak:0,
-          avgMode:10,onboardingSeen:false,difficulty:'normal',box1Mode:'streak',box2Mode:'today'};
+          avgMode:10,onboardingSeen:false,difficulty:'normal',box1Mode:'streak',box2Mode:'today',
+          highestRankIdx:0};
 }
 function saveP(p) {
   try {
@@ -1459,7 +1465,10 @@ function mkCard(card, small) {
 }
 
 function updateStats() {
-  var p=loadP(), r=getRank(p.streak);
+  var p=loadP();
+  var currentIdx = RANKS.indexOf(getRank(p.streak));
+  var displayIdx = Math.max(currentIdx, p.highestRankIdx || 0);
+  var r = RANKS[displayIdx];
   G('statRang').textContent = r.name;
 
   var b1mode = p.box1Mode || 'streak';
@@ -1667,10 +1676,16 @@ function openSettings() {
 
 function setDiff(d) {
   clearTimer();
-  var p=loadP(); p.difficulty=d; saveP(p);
+  var p=loadP();
+  if(p.difficulty !== d){
+    p.highestRankIdx = 0;
+    p.streak = 0;
+  }
+  p.difficulty=d; saveP(p);
   ['diffEasy','diffNormal','diffHard'].forEach(function(id){ G(id).classList.remove('active'); });
   G(d==='easy'?'diffEasy':d==='hard'?'diffHard':'diffNormal').classList.add('active');
   G('diffDesc').textContent=DIFF_DESCS[d];
+  updateStats();
 }
 
 G('btnSettings').addEventListener('click', openSettings);
@@ -1820,11 +1835,14 @@ function solve() {
   else               haptic([200]);
 
   var p=loadP();
-  var prevRank=getRank(p.streak), oldRec=p.record;
+  var prevDisplayIdx = Math.max(RANKS.indexOf(getRank(p.streak)), p.highestRankIdx || 0);
+  var oldRec=p.record;
 
   if(correct){
     p.streak++; p.wins=(p.wins||0)+1;
     if(p.streak>p.record) p.record=p.streak;
+    var achievedIdx = RANKS.indexOf(getRank(p.streak));
+    if(achievedIdx > (p.highestRankIdx || 0)) p.highestRankIdx = achievedIdx;
     updateDayStreak(p);
   } else {
     var hadStreak = p.streak > 0;
@@ -1846,8 +1864,8 @@ function solve() {
   state.phase='solved';
 
   if(correct){
-    var newRank=getRank(p.streak);
-    if(newRank.name!==prevRank.name && RANK_MSGS[newRank.name]){
+    var newRank = RANKS[p.highestRankIdx || 0];
+    if(p.highestRankIdx > prevDisplayIdx && RANK_MSGS[newRank.name]){
       setTimeout(function(){ showRankModal('🎉 '+newRank.name+'!',RANK_MSGS[newRank.name]); },700);
     } else if(p.streak>oldRec && p.streak>1){
       var growth=p.streak-oldRec;
