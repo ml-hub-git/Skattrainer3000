@@ -1,9 +1,10 @@
 /* ============================================================
-   SKAT TRAINER v2.4
+   SKAT TRAINER v3.0
    Änderungen ggü. v2.3:
    - Persistenter Rang: einmal erreichte Ränge bleiben erhalten,
      auch wenn der Streak bricht. Nur Difficulty-Wechsel setzt zurück.
    - Neues Feld highestRankIdx in skat_p (+ Backfill aus record).
+   - Aufteilung in index.html / style.css / app.js.
    ============================================================ */
 
 var SUITS = ['♦','♥','♠','♣'];
