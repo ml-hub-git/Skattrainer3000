@@ -28,7 +28,7 @@
   --accent-glow:      #e0ba5073;
   --card-gloss-hi:    #fffdf7;
   --card-gloss-lo:    #f5f0e2;
-  --card-text:        var(--card-text);
+  --card-text:        #1a1408;
   --suit-red-text:    #c0392b;
   --text-on-dark:     #1a1100;
   --text-on-danger:   #ffffff;
@@ -116,7 +116,7 @@
   --accent-glow:      #e0ba5059;
   --card-gloss-hi:    #fffdf7;
   --card-gloss-lo:    #f5f0e2;
-  --card-text:        var(--card-text);
+  --card-text:        #1a1408;
   --suit-red-text:    #c0392b;
   --text-on-dark:     #080808;
   --text-on-danger:   #ffffff;
