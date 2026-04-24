@@ -41,11 +41,10 @@ Statische, mobile-first Web-App zum Trainieren des Skat-Kartenrechnens (Schätzu
 - Casino-Fonts (Cinzel/IM Fell English): **verworfen** — nie per CDN geladen, zurück zu Default-Fonts
 - Casino-Borders: von opak-dunkelbraun (`#2a2010`) auf semitransparentes Gold (`#c9a84c40`) umgestellt
 
-### Glow-Effekt am Spieltisch (seit v3.2-Kandidat)
+### Glow-Effekt am Spieltisch (seit v3.1.4)
 - Inset-Schatten (direktional, links/rechts), kein äußerer Border-Glow
 - Parameter: `inset 50px 0 80px -20px var(--glow-color-hard)`
 - `--glow-color-hard` opak, kein Alpha (Default: `#ff1a1a` Rot; Casino: `#e0ba50` Gold)
-- Temporäre Mockup-Klassen (`.gmt-*`, `.gmp-*`) und Mockup-Sektion aus `index.html` vollständig entfernt
 
 ### Workflow (dauerhaft, in CLAUDE.md dokumentiert)
 - MCP-GitHub-Write-Tools (`push_files`, `create_or_update_file`): HTTP 403, faktisch read-only → Pushes laufen via `git push` + PAT direkt zu GitHub
@@ -68,25 +67,16 @@ Statische, mobile-first Web-App zum Trainieren des Skat-Kartenrechnens (Schätzu
 | v3.1.2 | `claude/add-theme-system-DAFj9` | Zirkuläre `--card-text`-Variable gefixt (Default + Casino) |
 | v3.1.3 | `claude/add-theme-system-DAFj9` | Casino: Schriftkontrast, Gold-Borders, Font-Overrides entfernt |
 | v3.1.4 | `claude/add-theme-system-DAFj9` | `.tisch-hint`, `.side-label`, `.side-arrow` auf `--text-muted`; zirkuläre `--arrow-active`-Variable gefixt |
-
-**Glow-Feature** (Branch `claude/gametable-glow-mockups-6e4W7`, v3.1.4-Basis):
-- `active-a`/`active-b` in `style.css` aktualisiert (neuer Glow produktiv)
-- Branch gepusht, Remote in Sync
-- PR noch nicht erstellt
+| v3.1.5 | `claude/create-projekt-status-TAWKv` | `active-a`/`active-b` in `style.css` aktualisiert (neuer Glow) | 
 
 ---
 
 ## Offene Punkte
 
 ### Sofort (User-Aktion erforderlich)
-- [ ] PR `claude/add-theme-system-DAFj9` → `main` öffnen (GitHub zeigt Banner)
-- [ ] PR `claude/gametable-glow-mockups-6e4W7` → `main` öffnen
-- [ ] PAT widerrufen: https://github.com/settings/tokens
-- [ ] Visuelle Verifikation nach GitHub-Pages-Deploy: Casino-Theme live testen (Mini-Karten, Stat-Boxen, Borders, Spieltisch, Hint-Texte, Glow-Richtung)
+-
 
 ### Features (noch nicht beauftragt)
-- [ ] Versionsnummer auf v3.2 anheben (nach Merge des Glow-Feature-Branches)
-- [ ] Side-Indicator-Glow (`filter: drop-shadow` via `--arrow-glow`) auf `--glow-color-hard` umstellen (konsistentere Optik)
 - [ ] Echte B/D/K-Kartengrafiken (me.uk/cards CC0 mit Index-Remap oder eigene SVGs)
 - [ ] PWA / Service Worker / Manifest / Homescreen-Installation
 - [ ] Konfetti als Meilenstein-Effekt (Rang-Aufstieg, neuer Rekord)
